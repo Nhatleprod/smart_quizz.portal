@@ -3,6 +3,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
 export default function detailExamPage() {
+  // dữ liệu test mặc định
   const examDetail = {
     id: "1",
     title: "Đề thi thử THPT Quốc Gia môn Toán năm 2023",
@@ -20,7 +21,6 @@ export default function detailExamPage() {
     passRate: 68,
     rating: 4.7,
     totalRatings: 256,
-    image: "https://tailieuonthi.org/wp-content/uploads/2025/01/bo-de-minh-hoa-tn-thpt-2025-gd-ktpl-677d6db1e11b2-1024x1024.webp",
     tags: ["THPT Quốc Gia", "Toán học", "Đề thi thử", "2023"],
     notes: [
       "Đề thi gồm 50 câu hỏi trắc nghiệm, mỗi câu 0.2 điểm.",
@@ -43,7 +43,7 @@ export default function detailExamPage() {
     ],
   };
 
-  // Mock data for comments (reduced)
+  // Dữ liệu giả lập comment
   const comments = [
     {
       id: "1",
@@ -75,7 +75,6 @@ export default function detailExamPage() {
       <Navbar />
       <div className="container mx-auto py-8 px-4 mt-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Exam header */}
             <div className="space-y-4">
@@ -168,17 +167,7 @@ export default function detailExamPage() {
                 </div>
               </div>
             </div>
-
-            {/* Exam image */}
-            <div className="relative h-[300px] w-full rounded-lg overflow-hidden">
-              <img
-                src={examDetail.image || "/placeholder.svg"}
-                alt={examDetail.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Tabs for different sections */}
+            {/* Tab cho các thông tin khác/mở rộng thêm*/}
             <div className="flex bg-gray-300 rounded-[5px] p-2">
                 <div className="flex space-x-2">
                     <button className="px-[105px] py-2 rounded-[5px] bg-white font-semibold text-base shadow-sm transition-all duration-200 cursor-pointer">
@@ -197,7 +186,7 @@ export default function detailExamPage() {
             <div className="py-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-semibold mb-2">
+                  <h2 className="text-2xl font-bold mb-2">
                     Thông tin đề thi
                   </h2>
                   <p className="text-gray-600">{examDetail.description}</p>
@@ -214,7 +203,7 @@ export default function detailExamPage() {
                     <div className="flex justify-between">
                       <span className="text-gray-500">Thời gian:</span>
                       <span className="font-medium">
-                        {examDetail.totalTime} phút
+                        {examDetail.totalTime} phút (đề xuất)
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -246,7 +235,7 @@ export default function detailExamPage() {
               </div>
             </div>
 
-            {/* Time selection and start button */}
+            {/* Radiobutton thời gian làm và bắt đầu làm bài */}
             <div className="border rounded-lg overflow-hidden">
               <div className="p-4 border-b">
                 <h2 className="text-lg font-semibold">Bắt đầu làm bài</h2>
@@ -303,7 +292,7 @@ export default function detailExamPage() {
                 </div>
               </div>
               <div className="p-4 border-t bg-gray-50">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer">
                   Bắt đầu làm bài
                 </button>
               </div>
@@ -397,7 +386,7 @@ export default function detailExamPage() {
               </div>
             </div>
 
-            {/* Comments section */}
+            {/* Comments */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">
@@ -429,7 +418,7 @@ export default function detailExamPage() {
                       className="w-full border rounded-md p-2 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-blue-700"
                     ></textarea>
                     <div className="flex justify-end">
-                      <button className="px-4 py-2 rounded-md flex items-center bg-blue-600 text-white hover:bg-blue-700">
+                      <button className="px-4 py-2 rounded-md flex items-center bg-blue-600 text-white hover:bg-blue-700 cursor-pointer">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="16"
@@ -456,10 +445,7 @@ export default function detailExamPage() {
               <div className="space-y-6 p-2 border-1 rounded-lg">
                 <div className="space-y-4">
                 {comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="rounded-lg overflow-hidden"
-                  >
+                  <div key={comment.id} className="rounded-lg overflow-hidden">
                     <div className="p-4">
                       {/* Comment */}
                       <div className="flex gap-4">
@@ -559,10 +545,7 @@ export default function detailExamPage() {
                         {index + 1}
                       </div>
                       <div>
-                        <a
-                          href={`/exam-detail/${exam.id}`}
-                          className="font-medium hover:underline line-clamp-2"
-                        >
+                        <a href={`/exam-detail/${exam.id}`} className="font-medium hover:underline line-clamp-2">
                           {exam.title}
                         </a>
                       </div>
