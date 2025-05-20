@@ -7,9 +7,9 @@ import { getUserFromToken } from '../utils/tokenUtils';
 
 const NAVBAR_ITEMS = [
   { name: "Trang chủ", path: "/" },
-  { name: "Bài viết", path: "/blog" },
-  { name: "Khóa học", path: "/course" },
-  { name: "Liên hệ", path: "/contact" },
+  { name: "Bài viết", path: "/pages/blog" },
+  { name: "Khóa học", path: "#" },
+  { name: "Liên hệ", path: "/pages/contact" },
 ];
 
 

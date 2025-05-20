@@ -134,20 +134,24 @@ const authService = {
     }
   },
 
-  async forgotPassword(email) {
+  async forgotPassword(emailOrUsername) {
     try {
-      const response = await api.post('/accounts/forgot-password', { email });
+      const response = await api.post('/accounts/forgot-password', { 
+        email: emailOrUsername.includes('@') ? emailOrUsername : undefined,
+        username: !emailOrUsername.includes('@') ? emailOrUsername : undefined
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Không thể xử lý yêu cầu quên mật khẩu' };
     }
   },
 
-  async resetPassword(resetToken, newPassword) {
+  async resetPassword(accountId, newPassword, confirmNewPassword) {
     try {
       const response = await api.post('/accounts/reset-password', {
-        resetToken,
-        newPassword
+        id: accountId,
+        newPassword,
+        confirmNewPassword
       });
       return response.data;
     } catch (error) {

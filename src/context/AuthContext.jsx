@@ -117,18 +117,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const forgotPassword = async (email) => {
+  const forgotPassword = async (emailOrUsername) => {
     try {
-      const response = await authService.forgotPassword(email);
+      const response = await authService.forgotPassword(emailOrUsername);
       return response;
     } catch (error) {
       throw error;
     }
   };
 
-  const resetPassword = async (resetToken, newPassword) => {
+  const resetPassword = async (accountId, newPassword, confirmNewPassword) => {
     try {
-      const response = await authService.resetPassword(resetToken, newPassword);
+      const response = await authService.resetPassword(accountId, newPassword, confirmNewPassword);
       return response;
     } catch (error) {
       throw error;
