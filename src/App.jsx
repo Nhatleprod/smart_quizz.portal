@@ -7,9 +7,7 @@ import MainLayout from "./layouts/MainLayout";
 import { AuthProvider } from "./context/AuthContext";
 import BlogPage from "./pages/blog/p-blog";
 import HomePage from "./pages/home/p-home";
-import DetailExamPage from "./pages/detail_exam/p-detail-exam";
 import ContactPage from "./pages/contact/p-contact";
-import CoursePage from "./pages/courses/p-course"
 
 const App = () => {
   return (
@@ -22,10 +20,8 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/blog" element={<BlogPage />} /> 
-          <Route path="/contact" element={<ContactPage />}/>
-          <Route path="/detail_exam" element={<DetailExamPage />}/>
-          <Route path="/course" element={<CoursePage/>}/> 
+          <Route path="/pages/blog" element={<BlogPage />} />
+          <Route path="/pages/contact" element={<ContactPage />}/>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
