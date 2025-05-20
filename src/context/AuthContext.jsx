@@ -1,8 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import authService from '../services/authService';
+import { getStoredTokens, getUserFromToken, isTokenExpired } from '../utils/tokenUtils';
 
-const AuthContext = createContext(null);
+// Create and export the context
+export const AuthContext = createContext(null);
 
+// Export the hook
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// Export the provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -11,38 +23,34 @@ export const AuthProvider = ({ children }) => {
   // Function to update auth state
   const updateAuthState = useCallback(() => {
     try {
-      const userInfo = authService.getCurrentUser();
-      const authenticated = authService.isAuthenticated();
-      
-      console.log('Auth State Update:', { 
-        userInfo, 
-        authenticated,
-        hasUser: !!userInfo,
-        hasToken: !!localStorage.getItem('auth'),
-        userId: userInfo?.id,
-        username: userInfo?.username
-      });
-      
-      // Update state only if both user and auth are valid
-      if (authenticated && userInfo && userInfo.id && userInfo.username) {
-        setUser(userInfo);
-        setIsAuthenticated(true);
-      } else {
-        // Clear state if either is invalid
+      const tokens = getStoredTokens();
+      if (!tokens?.accessToken) {
         setUser(null);
         setIsAuthenticated(false);
-        // Clear invalid auth data
-        if (localStorage.getItem('auth')) {
-          console.log('Clearing invalid auth data');
-          localStorage.removeItem('auth');
-        }
+        return;
       }
+
+      // Check if token is expired
+      if (isTokenExpired(tokens.accessToken)) {
+        setUser(null);
+        setIsAuthenticated(false);
+        return;
+      }
+
+      // Get user info from token
+      const userInfo = getUserFromToken(tokens.accessToken);
+      if (!userInfo) {
+        setUser(null);
+        setIsAuthenticated(false);
+        return;
+      }
+
+      setUser(userInfo);
+      setIsAuthenticated(true);
     } catch (error) {
       console.error('Error updating auth state:', error);
       setUser(null);
       setIsAuthenticated(false);
-      // Clear any potentially corrupted auth data
-      localStorage.removeItem('auth');
     }
   }, []);
 
@@ -85,41 +93,13 @@ export const AuthProvider = ({ children }) => {
       
       // Attempt login
       const response = await authService.login(credentials);
-      console.log('Login Response:', response);
-
-      // Get fresh auth state
-      const userInfo = authService.getCurrentUser();
-      const authenticated = authService.isAuthenticated();
       
-      console.log('Post-login auth state:', { 
-        userInfo, 
-        authenticated,
-        hasUser: !!userInfo,
-        hasToken: !!localStorage.getItem('auth')
-      });
-
-      // Verify auth state
-      if (!authenticated || !userInfo) {
-        throw new Error('Login succeeded but auth state is invalid');
-      }
-
-      // Update state
-      setUser(userInfo);
-      setIsAuthenticated(true);
-
-      // Verify state update
-      console.log('Auth state after update:', {
-        user: userInfo,
-        isAuthenticated: true,
-        hasUser: !!userInfo,
-        userId: userInfo.id,
-        username: userInfo.username
-      });
-
+      // Update auth state
+      updateAuthState();
+      
       return response;
     } catch (error) {
       console.error('Login Error:', error);
-      // Ensure state is cleared on error
       setUser(null);
       setIsAuthenticated(false);
       throw error;
@@ -132,7 +112,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Always clear state
       setUser(null);
       setIsAuthenticated(false);
     }
@@ -178,13 +157,6 @@ export const AuthProvider = ({ children }) => {
     changePassword
   };
 
-  // Debug log for context value
-  console.log('Auth Context Value:', {
-    user,
-    isAuthenticated,
-    hasUser: !!user,
-    loading
-  });
 
   return (
     <AuthContext.Provider value={value}>
@@ -192,13 +164,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export default AuthProvider;

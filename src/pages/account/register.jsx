@@ -35,7 +35,7 @@ const RegisterPage = memo(() => {
             <h1 className="text-gray-600 font-bold text-4xl">E-ALLBEST</h1>
           </Link>
 
-          <h2 className="text-4xl mt-2 font-bold text-center mb-6 text-gray-600">REGISTER</h2>
+          <h2 className="text-4xl mt-2 font-bold text-center mb-6 text-gray-600">ĐĂNG KÝ</h2>
 
           {successMessage && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
@@ -51,11 +51,11 @@ const RegisterPage = memo(() => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block">
-              <span className="font-semibold text-base text-stone-600">Username</span>
+              <span className="font-semibold text-base text-stone-600">Tên đăng nhập</span>
               <input
                 type="text"
                 name="username"
-                placeholder="Enter your username"
+                placeholder="Nhập tên đăng nhập"
                 value={formData.username}
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border ${
@@ -73,7 +73,7 @@ const RegisterPage = memo(() => {
               <input
                 type="email"
                 name="email"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 value={formData.email}
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border ${
@@ -87,12 +87,12 @@ const RegisterPage = memo(() => {
             </label>
 
             <label className="block">
-              <span className="font-semibold text-base text-stone-600">Password</span>
+              <span className="font-semibold text-base text-stone-600">Mật khẩu</span>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu"
                   value={formData.password}
                   onChange={handleChange}
                   className={`mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border ${
@@ -112,7 +112,7 @@ const RegisterPage = memo(() => {
                 </button>
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                Password must be at least 6 characters and contain at least one special character (!@#$%^&*(),.?":{}|&lt;&gt;)
+                Mật khẩu phải có ít nhất 6 ký tự và chứa ít nhất một ký tự đặc biệt (!@#$%^&*(),.?":{}|&lt;&gt;)
               </p>
               {errors.password && (
                 <span className="text-red-500 text-sm mt-1">{errors.password}</span>
@@ -120,12 +120,12 @@ const RegisterPage = memo(() => {
             </label>
 
             <label className="block">
-              <span className="font-semibold text-base text-stone-600">Confirm Password</span>
+              <span className="font-semibold text-base text-stone-600">Xác nhận mật khẩu</span>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
-                  placeholder="Confirm your password"
+                  placeholder="Nhập lại mật khẩu"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className={`mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border ${
@@ -156,13 +156,13 @@ const RegisterPage = memo(() => {
                 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-stone-700'} 
                 transition cursor-pointer`}
             >
-              {isLoading ? 'Registering...' : 'Register'}
+              {isLoading ? 'Đang đăng ký...' : 'Đăng ký'}
             </button>
 
             <p className="text-center text-gray-600 text-base mt-4">
-              Already have an account?{" "}
+              Đã có tài khoản?{" "}
               <Link to="/login" className="text-blue-700 hover:underline">
-                Sign in here!
+                Đăng nhập ngay!
               </Link>
             </p>
           </form>

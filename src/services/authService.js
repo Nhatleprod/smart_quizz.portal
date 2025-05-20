@@ -1,6 +1,12 @@
 import axios from 'axios';
+import { 
+  storeTokens, 
+  getStoredTokens, 
+  clearTokens, 
+  getUserFromToken, 
+  isTokenExpired 
+} from '../utils/tokenUtils';
 
-// Sử dụng import.meta.env thay vì process.env
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Tạo instance axios với config mặc định
@@ -8,64 +14,85 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
+  },
+  timeout: 10000,
+  validateStatus: function (status) {
+    return status >= 200 && status < 500; // Chấp nhận status từ 200-499
   }
 });
 
-// Interceptor để thêm token vào header
+// Interceptor để xử lý lỗi mạng và request
 api.interceptors.request.use(
   (config) => {
-    const authData = JSON.parse(localStorage.getItem('auth'));
-    if (authData?.accessToken) {
-      config.headers.Authorization = `Bearer ${authData.accessToken}`;
+    if (!navigator.onLine) {
+      return Promise.reject(new Error('Không có kết nối internet'));
+    }
+
+    const tokens = getStoredTokens();
+    if (tokens?.accessToken) {
+      config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
     return config;
   },
   (error) => {
+    console.error('Lỗi request:', error);
+    if (error.code === 'ECONNABORTED') {
+      return Promise.reject(new Error('Yêu cầu hết thời gian chờ'));
+    }
+    if (!error.response) {
+      return Promise.reject(new Error('Lỗi kết nối - vui lòng kiểm tra kết nối mạng'));
+    }
     return Promise.reject(error);
   }
 );
 
-// Interceptor để xử lý refresh token
+// Interceptor để xử lý response và refresh token
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Xử lý lỗi mạng
+    if (!error.response) {
+      if (error.message === 'Không có kết nối internet') {
+        return Promise.reject(new Error('Không có kết nối internet - vui lòng kiểm tra mạng'));
+      }
+      if (error.message === 'Yêu cầu hết thời gian chờ') {
+        return Promise.reject(new Error('Yêu cầu hết thời gian chờ - vui lòng thử lại'));
+      }
+      return Promise.reject(new Error('Lỗi kết nối - vui lòng kiểm tra kết nối mạng'));
+    }
+
     const originalRequest = error.config;
 
-    // Nếu lỗi 401 và chưa thử refresh token
+    // Xử lý refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        const authData = JSON.parse(localStorage.getItem('auth'));
-        if (!authData?.refreshToken) {
-          throw new Error('No refresh token available');
+        const tokens = getStoredTokens();
+        if (!tokens?.refreshToken) {
+          throw new Error('Không có refresh token');
         }
 
         const response = await api.post('/accounts/refresh-token', {
-          refreshToken: authData.refreshToken
+          refreshToken: tokens.refreshToken
         });
 
         const { accessToken } = response.data.data;
         
-        // Cập nhật token mới
-        const updatedAuth = {
-          ...authData,
-          accessToken
-        };
-        localStorage.setItem('auth', JSON.stringify(updatedAuth));
+        storeTokens(accessToken, tokens.refreshToken);
 
-        // Thử lại request ban đầu với token mới
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Nếu refresh token thất bại, logout user
-        localStorage.removeItem('auth');
+        console.error('Lỗi refresh token:', refreshError);
+        clearTokens();
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
 
-    return Promise.reject(error);
+    const errorMessage = error.response?.data?.message || error.message || 'Đã xảy ra lỗi';
+    return Promise.reject(new Error(errorMessage));
   }
 );
 
@@ -75,7 +102,7 @@ const authService = {
       const response = await api.post('/accounts', userData);
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Registration failed' };
+      throw error.response?.data || { message: 'Đăng ký thất bại!' };
     }
   },
 
@@ -84,89 +111,26 @@ const authService = {
       const response = await api.post('/accounts/login', credentials);
       const { data } = response.data;
       
-      // Validate response data
-      if (!data || !data.accessToken || !data.account) {
-        throw new Error('Invalid login response data');
+      if (!data || !data.accessToken || !data.refreshToken) {
+        throw new Error('Dữ liệu đăng nhập không hợp lệ');
       }
-
-      // Lưu trữ thông tin xác thực và user
-      const authData = {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        expiresIn: data.expiresIn || 3600, // Default 1 hour if not provided
-        userInfo: {
-          id: data.account.id,
-          username: data.account.username,
-          email: data.account.email,
-          role: data.account.role,
-          fullName: data.account.fullName || '',
-          avatar: data.account.avatar || ''
-        }
-      };
-
-      // Validate auth data before storing
-      if (!authData.userInfo.id || !authData.userInfo.username) {
-        throw new Error('Invalid user data in login response');
-      }
-      
-      // Debug log before storing
-      console.log('Preparing to store auth data:', {
-        hasToken: !!authData.accessToken,
-        hasUserInfo: !!authData.userInfo,
-        userId: authData.userInfo.id,
-        username: authData.userInfo.username
-      });
-      
-      // Store auth data
-      localStorage.setItem('auth', JSON.stringify(authData));
-      
-      // Verify stored data
-      const storedData = JSON.parse(localStorage.getItem('auth'));
-      if (!storedData || !storedData.accessToken || !storedData.userInfo) {
-        throw new Error('Failed to store auth data properly');
-      }
-
-      // Verify authentication state
-      const isAuth = this.isAuthenticated();
-      const currentUser = this.getCurrentUser();
-      
-      console.log('Post-login verification:', {
-        isAuthenticated: isAuth,
-        hasUser: !!currentUser,
-        userId: currentUser?.id,
-        username: currentUser?.username
-      });
-
-      if (!isAuth || !currentUser) {
-        throw new Error('Auth state verification failed after login');
-      }
+      storeTokens(data.accessToken, data.refreshToken);
       
       return data;
     } catch (error) {
-      console.error('Login error:', error);
-      // Clear any partial auth data
-      localStorage.removeItem('auth');
-      throw error.response?.data || { message: error.message || 'Login failed' };
+      console.error('Lỗi đăng nhập:', error);
+      clearTokens();
+      throw error.response?.data || { message: error.message || 'Đăng nhập thất bại' };
     }
   },
 
   async logout() {
     try {
-      const authData = JSON.parse(localStorage.getItem('auth'));
-      if (authData?.refreshToken) {
-        // Cập nhật endpoint logout
-        await api.post('/accounts/logout', {
-          refreshToken: authData.refreshToken,
-          userId: authData.userInfo.id // Thêm userId để server có thể xác định user cần logout
-        });
-      }
+      clearTokens();
+      return true;
     } catch (error) {
-      console.error('Logout error:', error);
-      // Vẫn xóa auth data ngay cả khi API call thất bại
-    } finally {
-      localStorage.removeItem('auth');
-      // Chuyển hướng về trang login sau khi logout
-      window.location.href = '/login';
+      console.error('Lỗi đăng xuất:', error);
+      throw error;
     }
   },
 
@@ -175,7 +139,7 @@ const authService = {
       const response = await api.post('/accounts/forgot-password', { email });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Failed to process forgot password request' };
+      throw error.response?.data || { message: 'Không thể xử lý yêu cầu quên mật khẩu' };
     }
   },
 
@@ -187,7 +151,7 @@ const authService = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Failed to reset password' };
+      throw error.response?.data || { message: 'Không thể đặt lại mật khẩu' };
     }
   },
 
@@ -199,79 +163,22 @@ const authService = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Failed to change password' };
+      throw error.response?.data || { message: 'Không thể thay đổi mật khẩu' };
     }
   },
 
   getCurrentUser() {
-    try {
-      const authData = localStorage.getItem('auth');
-      if (!authData) return null;
-      
-      const parsedData = JSON.parse(authData);
-      const { userInfo } = parsedData;
-
-      // Validate user info
-      if (!userInfo || !userInfo.id || !userInfo.username) {
-        console.error('Invalid user info in storage:', userInfo);
-        return null;
-      }
-
-      return userInfo;
-    } catch (error) {
-      console.error('Error getting current user:', error);
-      return null;
-    }
+    const tokens = getStoredTokens();
+    if (!tokens?.accessToken) return null;
+    
+    return getUserFromToken(tokens.accessToken);
   },
 
   isAuthenticated() {
-    try {
-      const authData = localStorage.getItem('auth');
-      if (!authData) {
-        console.log('No auth data found');
-        return false;
-      }
-      
-      const parsedData = JSON.parse(authData);
-      const { accessToken, userInfo } = parsedData;
-
-      // Debug log
-      console.log('Checking authentication:', {
-        hasToken: !!accessToken,
-        hasUserInfo: !!userInfo,
-        userId: userInfo?.id,
-        username: userInfo?.username
-      });
-
-      // Check both token and user info
-      if (!accessToken || !userInfo) {
-        console.log('Missing token or user info');
-        return false;
-      }
-
-      // Validate user info
-      if (!userInfo.id || !userInfo.username) {
-        console.log('Invalid user info');
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error checking authentication:', error);
-      return false;
-    }
-  },
-
-  // Helper method để kiểm tra token có hết hạn chưa
-  isTokenExpired() {
-    const authData = localStorage.getItem('auth');
-    if (!authData) return true;
-
-    const { expiresIn } = JSON.parse(authData);
-    if (!expiresIn) return true;
-
-    const expiresAt = expiresIn * 1000;
-    return Date.now() >= expiresAt;
+    const tokens = getStoredTokens();
+    if (!tokens?.accessToken) return false;
+    
+    return !isTokenExpired(tokens.accessToken);
   }
 };
 
