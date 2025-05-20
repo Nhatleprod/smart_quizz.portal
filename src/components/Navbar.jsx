@@ -1,13 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link,useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaSearch } from "react-icons/fa";
-const navbarItems =[
+import { useState } from "react";
+
+export default function Navbar() {
+  const location = useLocation();
+  const navbarItems =[
   { name: "Trang chủ", path: "/" },
   { name: "Bài viết", path: "/pages/blog" },
   { name: "Khóa học", path: "#" },
   { name: "Liên hệ", path: "/pages/contact" },
 ]
-export default function Navbar() {
   const { isLoggedIn, handleLogout } = useAuth();
 
   return (
@@ -18,19 +21,28 @@ export default function Navbar() {
           alt="logo"
           className="w-[40px] h-[40px]"
         />
-        <h1 className="text-blue-700 font-bold text-3xl">E-Allbest</h1>
+        <h1 className="text-blue-700 font-bold text-3xl">E-ALLBEST</h1>
       </div>
       <nav className="flex space-x-10 text-shadow-lg font-medium text-gray-700">
-        {navbarItems.map((item) => (
-          <Link
-            key={item.name}
-            to={item.path}
-            className="relative group inline-block hover:text-blue-700 transition duration-400 font-bold"
-          >
-            {item.name}
-            <span className="absolute left-0 -bottom-2 h-1 w-full bg-blue-700 scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
-          </Link>  
-        ))}
+        {navbarItems.map((tab) => {
+          const isActive = location.pathname === tab.path;
+          return (
+            <Link
+              key={tab.path}
+              to={tab.path}
+              className={`relative group inline-block transition duration-400 ${
+                isActive ? "text-blue-700 font-bold" : "text-gray-700"
+              }`}
+            >
+              {tab.name}
+              <span
+                className={`absolute left-0 -bottom-2 h-1 w-full bg-blue-700 transition-transform duration-500 origin-left ${
+                  isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                }`}
+              ></span>
+            </Link>
+          );
+        })}
       </nav>
       <div className="flex items-center space-x-2">
         <input
@@ -45,13 +57,13 @@ export default function Navbar() {
           <>
             <Link
               to="/login"
-              className="bg-black cursor-pointer text-white px-4 py-2 rounded ml-2 transition-transform duration-300 hover:translate-y-2 hover:bg-gray-700"
+              className="bg-black cursor-pointer text-white px-4 py-2 rounded ml-2 transition-transform duration-300 hover:translate-y-1 hover:bg-gray-700"
             >
               Đăng Nhập
             </Link>
             <Link
               to="/register"
-              className="border-black cursor-pointer px-5 py-2 border rounded ml-2 transition-transform duration-300 hover:translate-y-2 hover:bg-gray-300"
+              className="border-black cursor-pointer px-5 py-2 border rounded ml-2 transition-transform duration-300 hover:translate-y-1 hover:bg-gray-300"
             >
               Đăng Ký
             </Link>

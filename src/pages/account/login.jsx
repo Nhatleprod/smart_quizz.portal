@@ -28,7 +28,7 @@ export default function LoginPage({ onLogin }) {
               alt="logo"
               className="w-12 h-12"
             />
-            <h1 className="text-gray-600 font-bold text-4xl">E-Allbest</h1>
+            <h1 className="text-gray-600 font-bold text-4xl">E-ALLBEST</h1>
           </div>
           </a>
           <h2 className="text-4xl font-bold text-center mb-4 text-gray-600">LOGIN</h2>

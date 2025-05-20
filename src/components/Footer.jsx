@@ -14,7 +14,7 @@ export default function Footer() {
               alt="logo"
               className="w-10 h-10"
             />
-            <h1 className="text-blue-700 font-bold text-3xl">E-Allbest</h1>
+            <h1 className="text-blue-700 font-bold text-3xl">E-ALLBEST</h1>
           </div>
           <div className="flex space-x-4">
             <a href="#" target="_blank" rel="noopener noreferrer">
