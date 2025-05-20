@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 export function useLoginForm() {
@@ -20,10 +20,10 @@ export function useLoginForm() {
   const validateForm = useCallback(() => {
     const newErrors = {};
     if (!formData.username) {
-      newErrors.username = "Username is required";
+      newErrors.username = "Tên tài khoản là bắt buộc";
     }
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = "Mật khẩu là bắt buộc";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -55,7 +55,7 @@ export function useLoginForm() {
     setIsLoading(true);
     try {
       await login(formData);
-      setSuccessMessage("Login successful! Redirecting...");
+      setSuccessMessage("Đăng nhập thành công! Đang chuyển hướng...");
       
       // Wait for 1.5 seconds to show the success message before redirecting
       setTimeout(() => {
@@ -63,7 +63,7 @@ export function useLoginForm() {
       }, 1500);
     } catch (error) {
       setErrors({
-        submit: error.message || "Login failed. Please check your credentials."
+        submit: error.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập."
       });
     } finally {
       setIsLoading(false);

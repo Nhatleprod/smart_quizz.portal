@@ -20,37 +20,37 @@ export const useRegisterForm = () => {
     
     // Email validation
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email là bắt buộc';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = 'Email không hợp lệ';
     }
 
     // Username validation
     if (!formData.username) {
-      newErrors.username = 'Username is required';
+      newErrors.username = 'Tên tài khoản là bắt buộc';
     } else if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
+      newErrors.username = 'Tên tài khoản phải có ít nhất 3 ký tự';
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Mật khẩu là bắt buộc';
     } else {
       // Kiểm tra độ dài tối thiểu
       if (formData.password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
+        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
       }
       // Kiểm tra ký tự đặc biệt
       else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
-        newErrors.password = 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)';
+        newErrors.password = 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt (!@#$%^&*(),.?":{}|<>)';
       }
     }
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'Mật khẩu không khớp';
     }
 
     setErrors(newErrors);
@@ -90,7 +90,7 @@ export const useRegisterForm = () => {
         setTimeout(() => {
           navigate('/login', { 
             state: { 
-              message: response.message || 'Registration successful! Please login.',
+              message: response.message || 'Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.',
               type: 'success'
             }
           });
@@ -104,7 +104,7 @@ export const useRegisterForm = () => {
           setErrors(serverErrors);
         } else {
           setErrors({
-            submit: response.message || 'Registration failed. Please try again.'
+            submit: response.message || 'Đăng ký thất bại. Vui lòng thử lại.'
           });
         }
       }
@@ -117,7 +117,7 @@ export const useRegisterForm = () => {
         setErrors(serverErrors);
       } else {
         setErrors({
-          submit: error.message || 'Registration failed. Please try again.'
+          submit: error.message || 'Đăng ký thất bại. Vui lòng thử lại.'
         });
       }
     } finally {

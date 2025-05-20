@@ -36,7 +36,7 @@ export default function LoginPage() {
               <h1 className="text-gray-600 font-bold text-4xl">E-ALLBEST</h1>
             </div>
           </Link>
-          <h2 className="text-4xl font-bold text-center mb-4 text-gray-600">LOGIN</h2>
+          <h2 className="text-4xl font-bold text-center mb-4 text-gray-600">ĐĂNG NHẬP</h2>
 
           {successMessage && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded animate-fade-in">
@@ -62,11 +62,11 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block">
-              <span className="font-semibold text-base text-stone-600">Username</span>
+              <span className="font-semibold text-base text-stone-600">Tên đăng nhập</span>
               <input
                 type="text"
                 name="username"
-                placeholder="Enter your username"
+                placeholder="Nhập tên đăng nhập"
                 value={formData.username}
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border ${
@@ -79,12 +79,12 @@ export default function LoginPage() {
             </label>
 
             <label className="block">
-              <span className="font-semibold text-base text-stone-600">Password</span>
+              <span className="font-semibold text-base text-stone-600">Mật khẩu</span>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  placeholder="**********"
+                  placeholder="Nhập mật khẩu"
                   value={formData.password}
                   onChange={handleChange}
                   className={`mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border ${
@@ -115,10 +115,10 @@ export default function LoginPage() {
                   onChange={() => setRemember(!remember)}
                   className="rounded h-[15px] w-[15px] border-gray-300 focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="text-base">Remember me</span>
+                <span className="text-base">Ghi nhớ đăng nhập</span>
               </label>
               <Link to="/forgot-password" className="text-base text-blue-700 hover:underline">
-                Forgot password?
+                Quên mật khẩu?
               </Link>
             </div>
 
@@ -129,7 +129,7 @@ export default function LoginPage() {
                 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-stone-700'} 
                 transition cursor-pointer`}
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
 
             <button
@@ -142,7 +142,7 @@ export default function LoginPage() {
                   className="text-[#EA4335] text-[35px] hover:scale-110 transition-transform duration-300"
                 />
               </div>
-              <span className="text-[17px]">Sign in with Google</span>
+              <span className="text-[17px]">Đăng nhập với Google</span>
             </button>
             <button
               type="button"
@@ -154,13 +154,13 @@ export default function LoginPage() {
                   className="text-[#4285F4] text-[35px] hover:scale-110 transition-transform duration-300"
                 />
               </div>
-              <span className="text-[17px]">Sign in with Facebook</span>
+              <span className="text-[17px]">Đăng nhập với Facebook</span>
             </button>
 
             <p className="text-center text-gray-600 text-base mt-4">
-              Don't have an account?{" "}
+              Chưa có tài khoản?{" "}
               <Link to="/register" className="text-blue-700 text-base hover:underline">
-                Sign up to free!
+                Đăng ký miễn phí!
               </Link>
             </p>
           </form>

@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
             <h1 className="text-gray-600 font-bold text-4xl">E-Allbest</h1>
           </a>
 
-          <h2 className="text-3xl font-bold text-center mb-4 text-gray-600">E-ALLBEST</h2>
+          <h2 className="text-3xl font-bold text-center mb-4 text-gray-600">QUÊN MẬT KHẨU</h2>
 
           <form onSubmit={isVerified ? handleChangePassword : handleVerifyEmail} className="space-y-4">
             {/* Email input */}
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
               <span className="font-semibold text-base text-stone-600">Email</span>
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isVerified}
@@ -72,27 +72,27 @@ export default function ForgotPasswordPage() {
                 }`}
               />
               {emailStatus == "valid" && (
-                    <div className="flex items-center gap-2 mt-1 text-green-600 text-sm italic">
-                        <FontAwesomeIcon icon={faCircleCheck} className="text-green-600" />
-                        Email is valid!
-                    </div>
-                )}
+                <div className="flex items-center gap-2 mt-1 text-green-600 text-sm italic">
+                  <FontAwesomeIcon icon={faCircleCheck} className="text-green-600" />
+                  Email hợp lệ!
+                </div>
+              )}
               {emailStatus === "invalid" && (
                 <div className="flex items-center gap-2 mt-1 text-red-600 text-sm italic">
-                    <FontAwesomeIcon icon={faCircleExclamation} className="text-red-600" />
-                    Email is invalid!
+                  <FontAwesomeIcon icon={faCircleExclamation} className="text-red-600" />
+                  Email không hợp lệ!
                 </div>
-                )}
+              )}
             </label>
 
             {/* Mật khẩu cũ */}
             {isVerified && (
               <>
                 <label className="block">
-                  <span className="font-semibold text-base text-stone-600">Old Password</span>
+                  <span className="font-semibold text-base text-stone-600">Mật khẩu cũ</span>
                   <input
                     type="password"
-                    placeholder="********"
+                    placeholder="Nhập mật khẩu cũ"
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
                     className="mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border border-gray-300 focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none"
@@ -100,10 +100,10 @@ export default function ForgotPasswordPage() {
                 </label>
 
                 <label className="block">
-                  <span className="font-semibold text-base text-stone-600">New Password</span>
+                  <span className="font-semibold text-base text-stone-600">Mật khẩu mới</span>
                   <input
                     type="password"
-                    placeholder="********"
+                    placeholder="Nhập mật khẩu mới"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border border-gray-300 focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none"
@@ -111,10 +111,10 @@ export default function ForgotPasswordPage() {
                 </label>
 
                 <label className="block">
-                  <span className="font-semibold text-base text-stone-600">Confirm New Password</span>
+                  <span className="font-semibold text-base text-stone-600">Xác nhận mật khẩu mới</span>
                   <input
                     type="password"
-                    placeholder="********"
+                    placeholder="Nhập lại mật khẩu mới"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border border-gray-300 focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none"
@@ -127,10 +127,10 @@ export default function ForgotPasswordPage() {
               type="submit"
               className="w-full bg-black text-white py-3 rounded-lg text-lg font-semibold hover:bg-stone-700 transition cursor-pointer"
             >
-              {isVerified ? "Confirm Change" : "Verify"}
+              {isVerified ? "Xác nhận thay đổi" : "Xác thực"}
             </button>
             <label className="text-sm text-gray-500 mt-1">
-                <a href="/login" className="text-stone-500 hover:text-blue-600 text-lg"> ↺ Back to Login</a>
+              <a href="/login" className="text-stone-500 hover:text-blue-600 text-lg"> ↺ Quay lại đăng nhập</a>
             </label>
           </form>
         </div>
