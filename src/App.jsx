@@ -1,9 +1,13 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/account/login";
-import HomeLayout from "./layouts/HomeLayout";
+import RegisterPage from "./pages/account/register";
+import ForgotPassword from "./pages/account/forgotPassword";
 import MainLayout from "./layouts/MainLayout";
 import AuthContextProvider from "./context/AuthContext";
+import BlogPage from "./pages/blog/p-blog";
+import HomePage from "./pages/home/p-home";
+import ContactPage from "./pages/contact/p-contact";
 
 export default function App() {
   return (
@@ -11,9 +15,13 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<MainLayout />}>
-            <Route path="/" element={<HomeLayout />} />
+            <Route path="/" element={<HomePage />} />
           </Route>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/pages/blog" element={<BlogPage />} />
+          <Route path="/pages/contact" element={<ContactPage />}/>
         </Routes>
       </BrowserRouter>
     </AuthContextProvider>
