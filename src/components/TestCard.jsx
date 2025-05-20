@@ -31,9 +31,12 @@ export default function TestCard({
           ))}
         </div>
       </div>
-      <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer transition duration-400 hover:scale-105">
-        Chi tiết
+      <a href="/detail_exam" className="mt-4 bg-blue-600 text-center hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer transition duration-400 hover:scale-105">
+      <button className="">
+          Chi tiết
       </button>
+      </a>
+        
     </div>
   );
 }
