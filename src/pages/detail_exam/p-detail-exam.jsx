@@ -1,75 +1,129 @@
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { FiMapPin, FiPhone, FiMail } from "react-icons/fi";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
-export default function detailExamPage() {
-  // dữ liệu test mặc định
-  const examDetail = {
-    id: "1",
-    title: "Đề thi thử THPT Quốc Gia môn Toán năm 2023",
-    subject: "Toán học",
-    description:
-      "Đề thi thử THPT Quốc Gia môn Toán được biên soạn bởi các giáo viên có nhiều năm kinh nghiệm giảng dạy và luyện thi. Đề thi bám sát cấu trúc và độ khó của đề thi chính thức, giúp học sinh làm quen với các dạng bài tập và cấu trúc đề thi thực tế.",
-    totalQuestions: 50,
-    totalTime: 90, // minutes
-    difficulty: "Trung bình - Khó",
-    author: "TS. Nguyễn Văn A",
-    dateCreated: "15/04/2023",
-    lastUpdated: "20/05/2023",
-    totalAttempts: 1250,
-    averageScore: 7.5,
-    passRate: 68,
-    rating: 4.7,
-    totalRatings: 256,
-    tags: ["THPT Quốc Gia", "Toán học", "Đề thi thử", "2023"],
-    notes: [
-      "Đề thi gồm 50 câu hỏi trắc nghiệm, mỗi câu 0.2 điểm.",
-      "Thời gian làm bài mặc định là 90 phút.",
-      "Học sinh nên đọc kỹ đề bài trước khi làm.",
-      "Nên làm các câu dễ trước để đảm bảo thời gian và điểm số.",
-      "Đề thi có độ khó tương đương với đề thi chính thức.",
-    ],
-    relatedExams: [
-      { id: "2", title: "Đề thi thử THPT Quốc Gia môn Toán năm 2022" },
-      {
-        id: "3",
-        title: "Đề thi thử THPT Quốc Gia môn Toán - Đề số 2 năm 2023",
-      },
-      {
-        id: "4",
-        title:
-          "Đề thi thử THPT Quốc Gia môn Toán - Trường THPT Chuyên Lê Hồng Phong",
-      },
-    ],
-  };
+// Level mapping for Vietnamese display
+const levelMapping = {
+  easy: "Dễ",
+  medium: "Trung bình",
+  hard: "Khó"
+};
 
-  // Dữ liệu giả lập comment
-  const comments = [
-    {
-      id: "1",
-      user: {
-        id: "user1",
-        name: "Ngô Thành Tiến",
-        avatar: "https://danviet.ex-cdn.com/files/f1/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg",
-      },
-      content:
-        "Đề thi khá sát với cấu trúc đề thi thật. Mình làm được 42/50 câu, các bạn nên thử sức với đề này.",
-      date: "10/06/2023",
-      likes: 24,
-    },
-    {
-      id: "2",
-      user: {
-        id: "user4",
-        name: "Jack Bến Tre",
-        avatar: "https://anhnail.vn/wp-content/uploads/2025/01/jack-j97-bo-con-meme-12.webp",
-      },
-      content:
-        "Đề thi có độ khó vừa phải, nhưng có một số câu hỏi về tích phân khá khó. Mình nghĩ cần ôn kỹ phần này.",
-      date: "15/06/2023",
-      likes: 15,
-    },
+// Default time in minutes (can be calculated from questionCount)
+const getDefaultTime = (questionCount) => {
+  return Math.max(60, questionCount * 2); // 2 minutes per question, minimum 60 minutes
+};
+
+// Format date to Vietnamese format
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('vi-VN');
+};
+
+  export default function DetailExamPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [examDetail, setExamDetail] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(90);
+  const [comments, setComments] = useState([]);
+
+  // Mock related exams (since not provided by API)
+  const relatedExams = [
+    { id: "2", title: "Đề thi thử THPT Quốc Gia môn Toán năm 2022" },
+    { id: "3", title: "Đề thi thử THPT Quốc Gia môn Toán - Đề số 2 năm 2023" },
+    { id: "4", title: "Đề thi thử THPT Quốc Gia môn Toán - Trường THPT Chuyên Lê Hồng Phong" },
   ];
+
+  useEffect(() => {
+    const fetchExamDetail = async () => {
+      if (!id) {
+        setError("ID đề thi không hợp lệ");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+        const response = await axios.get(`${apiUrl}/exams/${id}`);
+        setExamDetail(response.data);
+        setSelectedTime(getDefaultTime(response.data.questionCount));
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching exam detail:', err);
+        setError("Không thể tải thông tin đề thi. Vui lòng thử lại sau.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchComments = async () => {
+      if (!id) return;
+      try {
+        const res = await axios.get(`http://localhost:3000/api/comments/exam/${id}`);
+        // Map API data to UI format
+        const mapped = (res.data || []).map((c) => ({
+          id: c.id,
+          user: {
+            id: c.account && c.account.id ? c.account.id : '',
+            name: c.account && c.account.user && c.account.user.fullName ? c.account.user.fullName : 'Người dùng',
+            avatar: c.account && c.account.avatarURL ? c.account.avatarURL : '/default-avatar.jpg',
+          },
+          content: c.content,
+          date: formatDate(c.createdAt),
+          likes: c.likes || 0,
+        }));
+        setComments(mapped);
+      } catch (err) {
+        setComments([]);
+      }
+    };
+
+    fetchExamDetail();
+    fetchComments();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <div className="container mx-auto py-8 px-4 mt-20">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg">Đang tải thông tin đề thi...</div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !examDetail) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <div className="container mx-auto py-8 px-4 mt-20">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-red-600">{error || "Không tìm thấy đề thi"}</div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Generate tags based on exam data
+  const tags = [
+    "THPT Quốc Gia",
+    examDetail.category,
+    "Đề thi thử",
+    new Date(examDetail.createdAt).getFullYear().toString()
+  ];
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -79,7 +133,7 @@ export default function detailExamPage() {
             {/* Exam header */}
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {examDetail.tags.map((tag, index) => (
+                {tags.map((tag, index) => (
                   <span
                     key={index}
                     className="inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm"
@@ -108,7 +162,7 @@ export default function detailExamPage() {
                     <line x1="16" y1="17" x2="8" y2="17" />
                     <polyline points="10 9 9 9 8 9" />
                   </svg>
-                  <span>{examDetail.subject}</span>
+                  <span>{examDetail.category}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <svg
@@ -127,7 +181,7 @@ export default function detailExamPage() {
                     <line x1="8" y1="2" x2="8" y2="6" />
                     <line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
-                  <span>Cập nhật: {examDetail.lastUpdated}</span>
+                  <span>Cập nhật: {formatDate(examDetail.updatedAt)}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <svg
@@ -146,7 +200,7 @@ export default function detailExamPage() {
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
-                  <span>{examDetail.totalAttempts} lượt thi</span>
+                  <span>{examDetail.attemptCount} lượt thi</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <svg
@@ -163,10 +217,11 @@ export default function detailExamPage() {
                     <circle cx="12" cy="12" r="10" />
                     <polyline points="12 6 12 12 16 14" />
                   </svg>
-                  <span>{examDetail.totalTime} phút</span>
+                  <span>{getDefaultTime(examDetail.questionCount)} phút</span>
                 </div>
               </div>
             </div>
+
             {/* Tab cho các thông tin khác/mở rộng thêm*/}
             <div className="flex bg-gray-300 rounded-[5px] p-2">
                 <div className="flex space-x-2">
@@ -197,37 +252,37 @@ export default function detailExamPage() {
                     <div className="flex justify-between">
                       <span className="text-gray-500">Số câu hỏi:</span>
                       <span className="font-medium">
-                        {examDetail.totalQuestions} câu
+                        {examDetail.questionCount} câu
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Thời gian:</span>
                       <span className="font-medium">
-                        {examDetail.totalTime} phút (đề xuất)
+                        {getDefaultTime(examDetail.questionCount)} phút (đề xuất)
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Độ khó:</span>
                       <span className="font-medium">
-                        {examDetail.difficulty}
+                        {levelMapping[examDetail.level]}
                       </span>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Tác giả:</span>
-                      <span className="font-medium">{examDetail.author}</span>
+                      <span className="font-medium">{examDetail.author.fullName}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Ngày tạo:</span>
                       <span className="font-medium">
-                        {examDetail.dateCreated}
+                        {formatDate(examDetail.createdAt)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Cập nhật:</span>
-                      <span className="font-medium">
-                        {examDetail.lastUpdated}
+                      <span className="text-gray-500">Trạng thái:</span>
+                      <span className={`font-medium ${examDetail.isApproved ? 'text-green-600' : 'text-yellow-600'}`}>
+                        {examDetail.isApproved ? 'Đã duyệt' : 'Chờ duyệt'}
                       </span>
                     </div>
                   </div>
@@ -256,23 +311,26 @@ export default function detailExamPage() {
                           id="time-60"
                           name="time"
                           value="60"
+                          checked={selectedTime === 60}
+                          onChange={() => setSelectedTime(60)}
                           className="h-4 w-4 text-blue-600"
                         />
                         <label htmlFor="time-60" className="text-sm">
-                          60 phút
+                          30 phút
                         </label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          id="time-90"
+                          id="time-default"
                           name="time"
-                          value="90"
-                          checked
+                          value={getDefaultTime(examDetail.questionCount)}
+                          checked={selectedTime === getDefaultTime(examDetail.questionCount)}
+                          onChange={() => setSelectedTime(getDefaultTime(examDetail.questionCount))}
                           className="h-4 w-4 text-blue-600"
                         />
-                        <label htmlFor="time-90" className="text-sm">
-                          90 phút (Đề xuất)
+                        <label htmlFor="time-default" className="text-sm">
+                          {getDefaultTime(examDetail.questionCount)} phút (Đề xuất)
                         </label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -281,6 +339,8 @@ export default function detailExamPage() {
                           id="time-120"
                           name="time"
                           value="120"
+                          checked={selectedTime === 120}
+                          onChange={() => setSelectedTime(120)}
                           className="h-4 w-4 text-blue-600"
                         />
                         <label htmlFor="time-120" className="text-sm">
@@ -292,7 +352,10 @@ export default function detailExamPage() {
                 </div>
               </div>
               <div className="p-4 border-t bg-gray-50">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer">
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/exam/${id}`)}
+                >
                   Bắt đầu làm bài
                 </button>
               </div>
@@ -310,7 +373,7 @@ export default function detailExamPage() {
                   {/* Overall rating */}
                   <div className="md:w-1/3 flex flex-col items-center justify-center p-4 bg-gray-50 rounded-lg">
                     <div className="text-5xl font-bold text-gray-800 mb-2">
-                      {examDetail.rating}
+                      {examDetail.avgRating}
                     </div>
                     <div className="flex mb-2">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -321,7 +384,7 @@ export default function detailExamPage() {
                           height="20"
                           viewBox="0 0 24 24"
                           fill={
-                            star <= Math.floor(examDetail.rating)
+                            star <= Math.floor(examDetail.avgRating)
                               ? "gold"
                               : "none"
                           }
@@ -335,7 +398,7 @@ export default function detailExamPage() {
                       ))}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {examDetail.totalRatings} đánh giá
+                      {examDetail.attemptCount} lượt thi
                     </div>
                   </div>
 
@@ -451,7 +514,7 @@ export default function detailExamPage() {
                       <div className="flex gap-4">
                         <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                           <img
-                            src={comment.user.avatar || "/placeholder.svg"}
+                            src={comment.user.avatar || "/api/placeholder/40/40"}
                             alt={comment.user.name}
                             className="w-full h-full object-cover"
                           />
@@ -539,13 +602,13 @@ export default function detailExamPage() {
               </div>
               <div className="p-4">
                 <div className="space-y-4">
-                  {examDetail.relatedExams.map((exam, index) => (
+                  {relatedExams.map((exam, index) => (
                     <div key={exam.id} className="flex items-start gap-3">
                       <div className="bg-gray-200 p-5 rounded-md h-12 w-12 flex items-center justify-center text-lg font-bold">
                         {index + 1}
                       </div>
                       <div>
-                        <a href={`/exam-detail/${exam.id}`} className="font-medium hover:underline line-clamp-2">
+                        <a href={`/detail_exam/${exam.id}`} className="font-medium hover:underline line-clamp-2">
                           {exam.title}
                         </a>
                       </div>
