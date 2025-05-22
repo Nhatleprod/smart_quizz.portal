@@ -2,41 +2,59 @@ import { Star } from "lucide-react";
 
 export default function TestCard({
   title,
-  duration,
-  rating,
-  count_user_make,
-  enroll,
-  tags,
+  avgRating,
+  attemptCount,
+  category,
+  questionCount,
+  onSelectExam,
 }) {
+  // Mặc định enroll = 120 như yêu cầu
+  const enroll = 120;
+  
+  // Rating trên thang điểm 5 thay vì 10
+  const rating = avgRating || 0;
+
   return (
-    <div className="h-[300px] border rounded-lg shadow-sm p-4 flex flex-col justify-between">
-      <div>
-        <h3 className="font-semibold text-xl mb-5">{title}</h3>
-        <div className="flex items-center gap-2 text-base text-gray-600 mb-2">
-          <span>🕒 {duration} phút</span>
-          <span className="text-base flex items-center gap-1">
-            <Star size={14} className="text-yellow-400" /> {rating}/10
+    <div className="h-80 border rounded-lg shadow-sm p-4 flex flex-col">
+      {/* Header Section */}
+      <div className="flex-shrink-0 mb-4">
+        <h3 className="font-semibold text-lg mb-3 line-clamp-2 leading-tight">
+          {title}
+        </h3>
+      </div>
+      
+      {/* Content Section - Flexible space */}
+      <div className="flex-grow space-y-2">
+        <div className="flex items-center gap-3 text-sm text-gray-600">
+          <span>🕒 90 phút</span>
+          <span className="flex items-center gap-1">
+            <Star size={12} className="text-yellow-400 fill-current" /> 
+            {rating}/5
           </span>
         </div>
-        <div className="text-base text-gray-700 mb-3">✍️ {count_user_make}</div>
-        <div className="text-base text-gray-700 mb-3">📢 {enroll}</div>
-        <div className="text-base text-gray-700 mb-3">
-          📚 3 Phần | 100 câu hỏi
+        
+        <div className="text-sm text-gray-700">✍️ {attemptCount} lượt thi</div>
+        <div className="text-sm text-gray-700">📢 {enroll} đăng ký</div>
+        <div className="text-sm text-gray-700">
+          📚 1 Phần | {questionCount} câu hỏi
         </div>
-        <div className="text-base space-x-2">
-          {tags.map((tag, idx) => (
-            <span key={idx} className="text-blue-500 font-medium">
-              #{tag}
-            </span>
-          ))}
+        
+        <div className="pt-2">
+          <span className="text-blue-500 font-medium text-sm">
+            #{category}
+          </span>
         </div>
       </div>
-      <a href="/detail_exam" className="mt-4 bg-blue-600 text-center hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer transition duration-400 hover:scale-105">
-      <button className="">
+      
+      {/* Button Section - Fixed at bottom */}
+      <div className="flex-shrink-0 pt-4">
+        <button 
+          onClick={onSelectExam}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium cursor-pointer transition-all duration-200 hover:scale-105"
+        >
           Chi tiết
-      </button>
-      </a>
-        
+        </button>
+      </div>
     </div>
   );
 }

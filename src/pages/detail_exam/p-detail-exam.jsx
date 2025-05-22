@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiMapPin, FiPhone, FiMail } from "react-icons/fi";
 import Navbar from "../../components/Navbar";
@@ -25,6 +25,7 @@ const formatDate = (dateString) => {
 
   export default function DetailExamPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [examDetail, setExamDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -315,7 +316,7 @@ const formatDate = (dateString) => {
                           className="h-4 w-4 text-blue-600"
                         />
                         <label htmlFor="time-60" className="text-sm">
-                          60 phút
+                          30 phút
                         </label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -351,7 +352,10 @@ const formatDate = (dateString) => {
                 </div>
               </div>
               <div className="p-4 border-t bg-gray-50">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer">
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/exam/${id}`)}
+                >
                   Bắt đầu làm bài
                 </button>
               </div>

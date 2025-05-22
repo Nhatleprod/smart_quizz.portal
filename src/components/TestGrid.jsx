@@ -1,20 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TestCard from "./TestCard";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import { href } from "react-router-dom";
-
-const testData = new Array(8).fill({
-  title: "TOEIC Reading Test 1",
-  duration: 75,
-  rating: 7.8,
-  count_user_make: 1400,
-  enroll: 120,
-  tags: ["Toeic", "English"],
-});
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function TestGrid() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [examData, setExamData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const totalPages = 5;
+  const navigate = useNavigate();
+
+  // Fetch dữ liệu từ API
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/exams`);
+        setExamData(response.data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching exams:", err);
+        setError("Không thể tải dữ liệu đề thi");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExams();
+  }, []);
 
   // Hàm đổi trang
   function goToPage(page) {
@@ -22,11 +37,40 @@ export default function TestGrid() {
     setCurrentPage(page);
   }
 
+  // Hàm xử lý click vào exam
+  const handleSelectExam = (exam) => {
+    navigate(`/detail_exam/${exam.id}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Đang tải...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg text-red-500">{error}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {testData.map((test, index) => (
-          <TestCard key={index} {...test} />
+        {examData.map((exam) => (
+          <TestCard 
+            key={exam.id} 
+            {...exam} 
+            onSelectExam={() => handleSelectExam(exam)}
+          />
         ))}
       </div>
 
@@ -58,7 +102,7 @@ export default function TestGrid() {
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-        <ChevronRight size={20} />
+          <ChevronRight size={20} />
         </button>
       </div>
     </div>

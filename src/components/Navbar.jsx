@@ -249,7 +249,10 @@ const Navbar = () => {
     setIsSearching(true);
     try {
       const response = await axios.get(`${API_URL}/exams`, {
-        params: { title: query.trim() }
+        params: { title: query.trim(),
+          description: query.trim(),
+          category: query.trim()
+         }
       });
       setSearchResults(response.data || []);
       setShowSearchResults(true);
