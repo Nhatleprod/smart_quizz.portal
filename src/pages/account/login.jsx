@@ -115,7 +115,7 @@ export default function LoginPage() {
                   onChange={() => setRemember(!remember)}
                   className="rounded h-[15px] w-[15px] border-gray-300 focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="text-base">Lưu tài khoản</span>
+                <span className="text-base">Ghi nhớ đăng nhập</span>
               </label>
               <Link to="/forgot-password" className="text-base text-blue-700 hover:underline">
                 Quên mật khẩu?
@@ -158,7 +158,7 @@ export default function LoginPage() {
             </button>
 
             <p className="text-center text-gray-600 text-base mt-4">
-              Bạn đã có tài khoản Chưa?{" "}
+              Chưa có tài khoản?{" "}
               <Link to="/register" className="text-blue-700 text-base hover:underline">
                 Đăng ký miễn phí!
               </Link>
