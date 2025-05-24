@@ -2,11 +2,11 @@ import { useState } from "react";
 import TestCard from "./TestCard";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
-const testData = new Array(6).fill({
+const testData = new Array(8).fill({
   title: "TOEIC Reading Test 1",
   duration: 75,
   rating: 7.8,
-  price: 1400,
+  count_user_make: 1400,
   enroll: 120,
   tags: ["Toeic", "English"],
 });
@@ -53,11 +53,11 @@ export default function TestGrid() {
           );
         })}
         <button
-          className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+          className="p-2 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer"
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-          <ChevronRight size={20} />
+        <ChevronRight size={20} />
         </button>
       </div>
     </div>
