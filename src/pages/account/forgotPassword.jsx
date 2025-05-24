@@ -2,43 +2,82 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import LogoApp from "../../assets/logo2.png";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+  const { forgotPassword, resetPassword } = useAuth();
+  const navigate = useNavigate();
+  
+  const [emailOrUsername, setEmailOrUsername] = useState("");
   const [isVerified, setIsVerified] = useState(false);
-  const [emailStatus, setEmailStatus] = useState("");
-  const [oldPassword, setOldPassword] = useState("");
+  const [verificationStatus, setVerificationStatus] = useState("");
+  const [accountId, setAccountId] = useState(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleVerifyEmail = (e) => {
+  const validatePassword = (password) => {
+    if (password.length < 6) {
+      return "Mật khẩu phải có ít nhất 6 ký tự";
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return "Mật khẩu phải có ít nhất một ký tự đặc biệt";
+    }
+    return "";
+  };
+
+  const handleVerifyEmail = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setVerificationStatus("");
+    setIsVerified(false);
 
-    // Giả lập kiểm tra email hợp lệ
-    if (email.includes("@")) {
+    try {
+      const response = await forgotPassword(emailOrUsername);
       setIsVerified(true);
-      setEmailStatus("valid");
-    } else {
-      alert("Vui lòng nhập email hợp lệ.");
-      setEmailStatus("invalid");
+      setVerificationStatus("valid");
+      setAccountId(response.data.account.id);
+    } catch (error) {
+      setIsVerified(false);
+      setVerificationStatus("invalid");
+      setAccountId(null);
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordError("");
+      alert(error.message || "Không tìm thấy tài khoản");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleChangePassword = (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
+    setPasswordError("");
 
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      alert("Vui lòng nhập đầy đủ thông tin.");
+    // Validate password
+    const passwordValidationError = validatePassword(newPassword);
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      alert("Mật khẩu mới và xác nhận không khớp.");
+      setPasswordError("Mật khẩu mới và xác nhận không khớp");
       return;
     }
 
-    // Xử lý logic đổi mật khẩu ở đây
-    alert("Đổi mật khẩu thành công!");
+    setIsLoading(true);
+    try {
+      await resetPassword(accountId, newPassword, confirmPassword);
+      alert("Đặt lại mật khẩu thành công!");
+      navigate("/login");
+    } catch (error) {
+      alert(error.message || "Không thể đặt lại mật khẩu");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,57 +96,65 @@ export default function ForgotPasswordPage() {
 
           <h2 className="text-3xl font-bold text-center mb-4 text-gray-600">QUÊN MẬT KHẨU</h2>
 
-          <form onSubmit={isVerified ? handleChangePassword : handleVerifyEmail} className="space-y-4">
-            {/* Email input */}
+          <form onSubmit={isVerified ? handleResetPassword : handleVerifyEmail} className="space-y-4">
+            {/* Email/Username input */}
             <label className="block">
-              <span className="font-semibold text-base text-stone-600">Email</span>
+              <span className="font-semibold text-base text-stone-600">Email hoặc tên đăng nhập</span>
               <input
-                type="email"
-                placeholder="Nhập email của bạn"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Nhập email hoặc tên đăng nhập"
+                value={emailOrUsername}
+                onChange={(e) => {
+                  setEmailOrUsername(e.target.value);
+                  if (isVerified) {
+                    setIsVerified(false);
+                    setVerificationStatus("");
+                    setAccountId(null);
+                    setNewPassword("");
+                    setConfirmPassword("");
+                    setPasswordError("");
+                  }
+                }}
                 disabled={isVerified}
                 className={`mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border border-gray-300 focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none ${
                   isVerified && "bg-gray-200 cursor-not-allowed"
                 }`}
               />
-              {emailStatus == "valid" && (
+              {verificationStatus === "valid" && (
                 <div className="flex items-center gap-2 mt-1 text-green-600 text-sm italic">
                   <FontAwesomeIcon icon={faCircleCheck} className="text-green-600" />
-                  Email hợp lệ!
+                  Tìm thấy tài khoản!
                 </div>
               )}
-              {emailStatus === "invalid" && (
+              {verificationStatus === "invalid" && (
                 <div className="flex items-center gap-2 mt-1 text-red-600 text-sm italic">
                   <FontAwesomeIcon icon={faCircleExclamation} className="text-red-600" />
-                  Email không hợp lệ!
+                  Không tìm thấy tài khoản!
                 </div>
               )}
             </label>
 
-            {/* Mật khẩu cũ */}
-            {isVerified && (
+            {/* Password fields - only show when account is found */}
+            {isVerified && accountId && (
               <>
-                <label className="block">
-                  <span className="font-semibold text-base text-stone-600">Mật khẩu cũ</span>
-                  <input
-                    type="password"
-                    placeholder="Nhập mật khẩu cũ"
-                    value={oldPassword}
-                    onChange={(e) => setOldPassword(e.target.value)}
-                    className="mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border border-gray-300 focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none"
-                  />
-                </label>
-
                 <label className="block">
                   <span className="font-semibold text-base text-stone-600">Mật khẩu mới</span>
                   <input
                     type="password"
                     placeholder="Nhập mật khẩu mới"
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setPasswordError(validatePassword(e.target.value));
+                    }}
                     className="mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border border-gray-300 focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none"
                   />
+                  {passwordError && (
+                    <div className="flex items-center gap-2 mt-1 text-red-600 text-sm italic">
+                      <FontAwesomeIcon icon={faCircleExclamation} className="text-red-600" />
+                      {passwordError}
+                    </div>
+                  )}
                 </label>
 
                 <label className="block">
@@ -116,7 +163,14 @@ export default function ForgotPasswordPage() {
                     type="password"
                     placeholder="Nhập lại mật khẩu mới"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (e.target.value !== newPassword) {
+                        setPasswordError("Mật khẩu mới và xác nhận không khớp");
+                      } else {
+                        setPasswordError("");
+                      }
+                    }}
                     className="mt-1 block w-full rounded-lg text-base bg-gray-300 p-3 border border-gray-300 focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none"
                   />
                 </label>
@@ -125,9 +179,12 @@ export default function ForgotPasswordPage() {
 
             <button
               type="submit"
-              className="w-full bg-black text-white py-3 rounded-lg text-lg font-semibold hover:bg-stone-700 transition cursor-pointer"
+              disabled={isLoading}
+              className={`w-full bg-black text-white py-3 rounded-lg text-lg font-semibold hover:bg-stone-700 transition ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              }`}
             >
-              {isVerified ? "Xác nhận thay đổi" : "Xác thực"}
+              {isLoading ? "Đang xử lý..." : (isVerified ? "Đặt lại mật khẩu" : "Xác thực")}
             </button>
             <label className="text-sm text-gray-500 mt-1">
               <a href="/login" className="text-stone-500 hover:text-blue-600 text-lg"> ↺ Quay lại đăng nhập</a>
